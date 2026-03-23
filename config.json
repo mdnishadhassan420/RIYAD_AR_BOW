@@ -12,8 +12,8 @@
   "antiInbox": false,
   "language": "en",
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
-  "nickNameBot": "BabyBot",
-  "prefix": "!",
+  "nickNameBot": "⎯༢ 𝗤͜͡𝗨𝗘𝗘⃟𝗡 ⊰🎀",
+  "prefix": "/",
   "api": "https://sayem-online-all-apixs.onrender.com/sayem",
   "approval": false,
   "reactBy": {
@@ -31,10 +31,10 @@
     "ignoreCommand": []
   },
   "adminBot": [
-    ""
+    "61579497520002"
   ],
   "mainAdmin": [
-    ""
+    "61579497520002"
   ],
   "whiteListMode": {
     "enable": false,
