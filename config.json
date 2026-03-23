@@ -14,7 +14,7 @@
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
   "nickNameBot": "BabyBot",
   "prefix": "!",
-  "api": "https://api.noobs-api.rf.gd/dipto",
+  "api": "https://sayem-online-all-apixs.onrender.com/sayem",
   "approval": false,
   "reactBy": {
     "delete": [
@@ -31,16 +31,16 @@
     "ignoreCommand": []
   },
   "adminBot": [
-    "61552258402755"
+    ""
   ],
   "mainAdmin": [
-    "61552258402755"
+    ""
   ],
   "whiteListMode": {
     "enable": false,
     "whiteListIds": [
-      "61552258402755",
-      "100044327656712"
+      "",
+      ""
     ],
     "notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot"
   },
