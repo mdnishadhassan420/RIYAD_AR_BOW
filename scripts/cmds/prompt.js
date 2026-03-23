@@ -1,32 +1,49 @@
-const axios = require('axios');
-const baseApiUrl = async () => {
-  const base = await axios.get(
-    `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`,
-  );
-  return base.data.api;
-};
-module.exports.config ={
+const axios = require("axios");
+
+module.exports = {
+  config: {
     name: "prompt",
-    version: "6.9",
-    author: "dipto",
+    aliases: ["p"],
+    version: "3.0",
+    author: "Ariyan",
     countDown: 5,
     role: 0,
-    category: "media",
-    description: " image to prompt",
-    category: "tools",
-    usages: "reply [image]"
+    category: "ai",
+    shortDescription: "Generate detailed visual prompt",
+    longDescription: "Generate highly detailed prompt from text or replied image",
+    guide: "{pn} [text] or reply to image"
   },
 
-module.exports.onStart = async ({ api, event,args }) =>{
-    const dip = event.messageReply?.attachments[0]?.url || args.join(' ');
-    if (!dip) {
-      return api.sendMessage('Please reply to an image.', event.threadID, event.messageID);
-    }
+  onStart: async function ({ message, event, args }) {
     try {
-      const prom = (await axios.get(`${await baseApiUrl()}/prompt?url=${encodeURIComponent(dip)}`)).data.prompt;
-         api.sendMessage(prom, event.threadID, event.messageID);
-    } catch (error) {
-      console.error(error);
-      return api.sendMessage('Failed to convert image into text.', event.threadID, event.messageID);
+      let imgUrl = event.messageReply?.attachments?.[0]?.type === "photo" 
+                    ? event.messageReply.attachments[0].url 
+                    : null;
+
+      let userPrompt = !imgUrl && args.length ? args.join(" ") : null;
+
+      if (!imgUrl && !userPrompt) 
+        return message.reply("⚠ Provide a text prompt or reply to an image.");
+
+      message.reaction("⏳", event.messageID);
+
+      const apiUrl = imgUrl 
+        ? `http://45.130.164.219:8000/api/prompt?img=${encodeURIComponent(imgUrl)}`
+        : `http://45.130.164.219:8000/api/prompt?prompt=${encodeURIComponent(userPrompt)}`;
+
+      const res = await axios.get(apiUrl, { timeout: 90000 });
+
+      if (!res.data?.status) {
+        message.reaction("❌", event.messageID);
+        return message.reply("❌ API Error: " + (res.data?.error || "Unknown error"));
+      }
+
+      message.reaction("✅", event.messageID);
+      return message.reply(res.data.prompt);
+
+    } catch (err) {
+      message.reaction("❌", event.messageID);
+      return message.reply("❌ Failed: " + err.message);
     }
-  };
+  }
+};
