@@ -1,380 +1,299 @@
-const { createCanvas, loadImage, registerFont } = require('canvas');
-const fs = require('fs-extra');
-const path = require('path');
 const axios = require('axios');
-
-const fontDir = path.join(__dirname, 'assets', 'font');
-const cacheDir = path.join(__dirname, 'cache');
-
-try {
-    if (fs.existsSync(path.join(fontDir, 'NotoSans-Bold.ttf'))) {
-        registerFont(path.join(fontDir, 'NotoSans-Bold.ttf'), { family: 'NotoSans', weight: 'bold' });
-    }
-    if (fs.existsSync(path.join(fontDir, 'NotoSans-SemiBold.ttf'))) {
-        registerFont(path.join(fontDir, 'NotoSans-SemiBold.ttf'), { family: 'NotoSans', weight: '600' });
-    }
-    if (fs.existsSync(path.join(fontDir, 'NotoSans-Regular.ttf'))) {
-        registerFont(path.join(fontDir, 'NotoSans-Regular.ttf'), { family: 'NotoSans', weight: 'normal' });
-    }
-    if (fs.existsSync(path.join(fontDir, 'BeVietnamPro-Bold.ttf'))) {
-        registerFont(path.join(fontDir, 'BeVietnamPro-Bold.ttf'), { family: 'BeVietnamPro', weight: 'bold' });
-    }
-    if (fs.existsSync(path.join(fontDir, 'BeVietnamPro-SemiBold.ttf'))) {
-        registerFont(path.join(fontDir, 'BeVietnamPro-SemiBold.ttf'), { family: 'BeVietnamPro', weight: '600' });
-    }
-} catch (e) {
-    console.log("BalanceCard: Using fallback fonts");
-}
-
-const CURRENCY_SYMBOL = "$";
-
-function formatMoney(amount) {
-    return amount.toLocaleString("en-US");
-}
-
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-}
-
-async function getProfilePicture(uid) {
-    try {
-        const avatarURL = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
-        const response = await axios.get(avatarURL, { responseType: 'arraybuffer', timeout: 10000 });
-        return await loadImage(Buffer.from(response.data));
-    } catch (error) {
-        console.error("Failed to fetch profile picture:", error.message);
-        return null;
-    }
-}
-
-function drawDefaultAvatar(ctx, x, y, size) {
-    const gradient = ctx.createRadialGradient(x + size/2, y + size/2, 0, x + size/2, y + size/2, size/2);
-    gradient.addColorStop(0, '#22c55e');
-    gradient.addColorStop(1, '#16a34a');
-    
-    ctx.beginPath();
-    ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(x + size/2, y + size/2 - 10, 25, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.beginPath();
-    ctx.ellipse(x + size/2, y + size/2 + 45, 40, 30, 0, Math.PI, 0, true);
-    ctx.fill();
-}
-
-async function createBalanceCard(userData, userID, balance) {
-    const width = 950;
-    const height = 520;
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
-
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#0a0f0d');
-    gradient.addColorStop(0.3, '#0d1f17');
-    gradient.addColorStop(0.6, '#0f2a1d');
-    gradient.addColorStop(1, '#0a0f0d');
-    
-    drawRoundedRect(ctx, 0, 0, width, height, 25);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    ctx.save();
-    for (let i = 0; i < 100; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 1.5 + 0.3;
-        const opacity = Math.random() * 0.3 + 0.1;
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    ctx.restore();
-
-    ctx.save();
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.03)';
-    ctx.lineWidth = 1;
-    for (let i = -height; i < width; i += 50) {
-        ctx.beginPath();
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i + height, height);
-        ctx.stroke();
-    }
-    ctx.restore();
-
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.2)';
-    ctx.lineWidth = 2;
-    drawRoundedRect(ctx, 12, 12, width - 24, height - 24, 20);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.08)';
-    ctx.lineWidth = 1;
-    drawRoundedRect(ctx, 20, 20, width - 40, height - 40, 16);
-    ctx.stroke();
-
-    const glowGradient = ctx.createLinearGradient(0, 0, 350, 0);
-    glowGradient.addColorStop(0, 'rgba(34, 197, 94, 0.15)');
-    glowGradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
-    ctx.fillStyle = glowGradient;
-    ctx.fillRect(0, 0, 350, height);
-
-    ctx.save();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 30px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.shadowColor = 'rgba(34, 197, 94, 0.5)';
-    ctx.shadowBlur = 10;
-    ctx.fillText('WALLET BALANCE', 50, 70);
-    ctx.shadowBlur = 0;
-    ctx.restore();
-
-    ctx.font = '600 15px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText('Digital Payment Card', 50, 100);
-
-    ctx.font = '600 14px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(187, 247, 208, 0.7)';
-    ctx.fillText('AVAILABLE BALANCE', 50, 175);
-
-    ctx.save();
-    for (let i = 12; i > 0; i--) {
-        ctx.fillStyle = `rgba(34, 197, 94, ${0.015 * i})`;
-        ctx.font = `bold ${68 + i * 0.5}px "NotoSans", "BeVietnamPro", sans-serif`;
-        ctx.fillText(`${CURRENCY_SYMBOL}${formatMoney(balance)}`, 48 + (12 - i) * 0.2, 248 + (12 - i) * 0.2);
-    }
-    ctx.restore();
-
-    const balanceGradient = ctx.createLinearGradient(50, 200, 450, 250);
-    balanceGradient.addColorStop(0, '#4ade80');
-    balanceGradient.addColorStop(0.5, '#22c55e');
-    balanceGradient.addColorStop(1, '#16a34a');
-    ctx.fillStyle = balanceGradient;
-    ctx.font = 'bold 68px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillText(`${CURRENCY_SYMBOL}${formatMoney(balance)}`, 50, 250);
-
-    ctx.font = '600 14px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(187, 247, 208, 0.7)';
-    ctx.fillText('CARD HOLDER', 50, 320);
-
-    ctx.font = 'bold 26px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = '#ffffff';
-    const displayName = (userData.name || 'Unknown').toUpperCase().slice(0, 22);
-    ctx.fillText(displayName, 50, 355);
-
-    ctx.font = '600 14px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(187, 247, 208, 0.7)';
-    ctx.fillText('USER ID', 50, 410);
-
-    ctx.font = 'bold 18px "NotoSans", "BeVietnamPro", monospace';
-    ctx.fillStyle = '#bbf7d0';
-    ctx.fillText(userID, 50, 445);
-
-    const profilePic = await getProfilePicture(userID);
-    const picSize = 130;
-    const picX = width - picSize - 55;
-    const picY = 55;
-
-    ctx.save();
-    for (let i = 18; i > 0; i--) {
-        ctx.beginPath();
-        ctx.arc(picX + picSize / 2, picY + picSize / 2, picSize / 2 + i, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(34, 197, 94, ${0.02 * i})`;
-        ctx.fill();
-    }
-    ctx.restore();
-
-    if (profilePic) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(picX + picSize / 2, picY + picSize / 2, picSize / 2, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(profilePic, picX, picY, picSize, picSize);
-        ctx.restore();
-    } else {
-        drawDefaultAvatar(ctx, picX, picY, picSize);
-    }
-
-    ctx.beginPath();
-    ctx.arc(picX + picSize / 2, picY + picSize / 2, picSize / 2, 0, Math.PI * 2);
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(picX + picSize / 2, picY + picSize / 2, picSize / 2 + 8, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.3)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    const statusX = picX + picSize - 12;
-    const statusY = picY + picSize - 12;
-    ctx.beginPath();
-    ctx.arc(statusX, statusY, 14, 0, Math.PI * 2);
-    ctx.fillStyle = '#22c55e';
-    ctx.fill();
-    ctx.strokeStyle = '#0a0f0d';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    ctx.save();
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
-    drawRoundedRect(ctx, width - 200, height - 125, 160, 85, 12);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.2)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
-    ctx.font = '600 11px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(187, 247, 208, 0.6)';
-    ctx.textAlign = 'center';
-    ctx.fillText('CARD STATUS', width - 120, height - 98);
-    
-    ctx.font = 'bold 16px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = '#4ade80';
-    ctx.fillText('ACTIVE', width - 120, height - 68);
-    ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
-    drawRoundedRect(ctx, width - 380, height - 125, 160, 85, 12);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.2)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
-    ctx.font = '600 11px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(187, 247, 208, 0.6)';
-    ctx.textAlign = 'center';
-    ctx.fillText('CARD TYPE', width - 300, height - 98);
-    
-    ctx.font = 'bold 16px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = '#22c55e';
-    ctx.fillText('PREMIUM', width - 300, height - 68);
-    ctx.restore();
-
-    const chipX = width - 190;
-    const chipY = 210;
-    const chipGradient = ctx.createLinearGradient(chipX, chipY, chipX + 65, chipY + 50);
-    chipGradient.addColorStop(0, '#d4af37');
-    chipGradient.addColorStop(0.3, '#f5d76e');
-    chipGradient.addColorStop(0.7, '#d4af37');
-    chipGradient.addColorStop(1, '#a67c00');
-    
-    drawRoundedRect(ctx, chipX, chipY, 65, 50, 6);
-    ctx.fillStyle = chipGradient;
-    ctx.fill();
-
-    ctx.strokeStyle = '#a67c00';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(chipX, chipY + 10 + i * 10);
-        ctx.lineTo(chipX + 65, chipY + 10 + i * 10);
-        ctx.stroke();
-    }
-    for (let i = 0; i < 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(chipX + 18 + i * 22, chipY);
-        ctx.lineTo(chipX + 18 + i * 22, chipY + 50);
-        ctx.stroke();
-    }
-
-    ctx.save();
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    ctx.font = '600 11px "NotoSans", "BeVietnamPro", sans-serif';
-    ctx.fillStyle = 'rgba(187, 247, 208, 0.4)';
-    ctx.textAlign = 'right';
-    ctx.fillText(`Generated: ${dateStr}`, width - 50, height - 18);
-    ctx.restore();
-
-    return canvas.toBuffer('image/png');
-}
+const fs = require('fs-extra');
+const { createCanvas, loadImage } = require('canvas');
+const path = require('path');
 
 module.exports = {
-    config: {
-        name: "balancec",
-        aliases: ["bal", "wallet", "mybalance", "wcard"],
-        version: "2.0.0",
-        author: "Neoaz ゐ",
-        countDown: 10,
-        role: 0,
-        description: "Display your wallet balance with a professional card featuring your profile picture",
-        category: "economy",
-        guide: `{pn} - View your balance card
-{pn} @tag - View tagged user's balance card`
-    },
-
-    onStart: async function({ message, event, usersData, args }) {
-        try {
-            message.reaction("⏳", event.messageID);
-
-            await fs.ensureDir(cacheDir);
-
-            let targetID = event.senderID;
-            
-            if (event.messageReply) {
-                targetID = event.messageReply.senderID;
-            } else if (Object.keys(event.mentions).length > 0) {
-                targetID = Object.keys(event.mentions)[0];
-            } else if (args[0] && !isNaN(args[0])) {
-                targetID = args[0];
-            }
-
-            const userData = await usersData.get(targetID);
-            
-            if (!userData) {
-                message.reaction("❌", event.messageID);
-                return message.reply("User not found in database!");
-            }
-
-            const balance = userData.money || 0;
-
-            const buffer = await createBalanceCard(userData, targetID, balance);
-            const imagePath = path.join(cacheDir, `balancecard_${targetID}_${Date.now()}.png`);
-            
-            await fs.writeFile(imagePath, buffer);
-
-            const isOwn = targetID === event.senderID;
-            const msgBody = isOwn 
-                ? `${userData.name}\nBalance: ${CURRENCY_SYMBOL}${formatMoney(balance)}`
-                : `WALLET CARD\n━━━━━━━━━━━━━━━━━━\n${userData.name}\nBalance: ${CURRENCY_SYMBOL}${formatMoney(balance)}`;
-
-            await message.reply({
-                body: msgBody,
-                attachment: fs.createReadStream(imagePath)
-            });
-
-            message.reaction("✅", event.messageID);
-
-            setTimeout(async () => {
-                try {
-                    if (await fs.pathExists(imagePath)) {
-                        await fs.unlink(imagePath);
-                    }
-                } catch (e) {}
-            }, 5000);
-
-        } catch (error) {
-            console.error("Balance Card Error:", error);
-            message.reaction("❌", event.messageID);
-            return message.reply("An error occurred while generating your balance card. Please try again.");
-        }
+  config: {
+    name: "balance",
+    aliases: ["bal", "wallet"],
+    version: "1.1",
+    author: "Rasin",
+    prefix: false,
+    countDown: 5,
+    role: 0,
+    description: "Check balance with wallet card design",
+    category: "economy",
+    guide: {
+      en: "{pn} balance | Check your balance with card\n"
+        + "{pn} balance @user | Check others balance\n"
+        + "{pn} balance <name> | Search user by name and check balance\n"
+        + "{pn} balance <uid> | Check balance by user ID\n"
+        + "{pn} balance [reply] | Check replied user's balance\n"
     }
+  },
+
+  langs: {
+    en: {
+      notFound: "User '%1' not found in this conversation",
+      multiple: "Multiple users found with name '%1':\n%2\n\nPlease use their UID or be more specific.",
+      error: "❌ Error generating wallet card. Please try again.",
+      cardMessage: "👀 %1 Your Balance ✨\n\n🧸💵 %2"
+    }
+  },
+
+  onStart: async function ({ message, event, args, usersData, api, getLang }) {
+    const { senderID, messageReply, mentions } = event;
+
+    try {
+      let targetID = senderID;
+
+      if (messageReply?.senderID && !args[0]) {
+        targetID = messageReply.senderID;
+      } 
+      else if (Object.keys(mentions).length > 0) {
+        targetID = Object.keys(mentions)[0];
+      }
+      else if (args[0] && /^\d+$/.test(args[0])) {
+        targetID = args[0];
+      }
+      else if (args[0]) {
+        const query = args.join(" ");
+        const matches = await findUserByName(api, usersData, event.threadID, query);
+
+        if (matches.length === 0) {
+          return message.reply(getLang("notFound", query.replace(/@/g, "")));
+        }
+
+        if (matches.length > 1) {
+          const matchList = matches.map(m => `• ${m.name}: ${m.uid}`).join('\n');
+          return message.reply(getLang("multiple", query.replace(/@/g, ""), matchList));
+        }
+
+        targetID = matches[0].uid;
+      }
+
+      const userData = await usersData.get(targetID);
+      const userName = await usersData.getName(targetID);
+      const userMoney = userData.money || 0;
+
+      const avatarUrl = `https://arshi-facebook-pp.vercel.app/api/pp?uid=${targetID}`;
+
+      const formatMoney = (amount) => {
+        if (isNaN(amount)) return "$0";
+        amount = Number(amount);
+        const scales = [
+          { value: 1e15, suffix: 'Q' },
+          { value: 1e12, suffix: 'T' },
+          { value: 1e9, suffix: 'B' },
+          { value: 1e6, suffix: 'M' },
+          { value: 1e3, suffix: 'k' }
+        ];
+        const scale = scales.find(s => amount >= s.value);
+        if (scale) {
+          const scaledValue = amount / scale.value;
+          return `$${scaledValue.toFixed(1)}${scale.suffix}`;
+        }
+        return `$${amount.toLocaleString()}`;
+      };
+
+      const canvas = createCanvas(800, 450);
+      const ctx = canvas.getContext('2d');
+
+      const bgGradient = ctx.createLinearGradient(0, 0, 800, 450);
+      bgGradient.addColorStop(0, '#0f0c29');
+      bgGradient.addColorStop(0.5, '#302b63');
+      bgGradient.addColorStop(1, '#24243e');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, 800, 450);
+
+      ctx.globalAlpha = 0.08;
+      for (let i = 0; i < 8; i++) {
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(600 + i * 20, 50 + i * 30, 80, 80);
+      }
+      
+      ctx.strokeStyle = '#ff0080';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 15; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * 60, 0);
+        ctx.lineTo(i * 60 + 150, 450);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      const roundRect = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      };
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 2;
+      roundRect(40, 40, 720, 370, 25);
+      ctx.fill();
+      ctx.stroke();
+
+      const accentGradient = ctx.createLinearGradient(40, 40, 760, 40);
+      accentGradient.addColorStop(0, '#00d4ff');
+      accentGradient.addColorStop(0.5, '#ff0080');
+      accentGradient.addColorStop(1, '#00ffaa');
+      ctx.fillStyle = accentGradient;
+      roundRect(40, 40, 720, 8, 25);
+      ctx.fill();
+
+      try {
+        const avatarResponse = await axios.get(avatarUrl, { responseType: 'arraybuffer' });
+        const avatar = await loadImage(Buffer.from(avatarResponse.data));
+        
+        ctx.shadowColor = '#00d4ff';
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.arc(140, 160, 85, 0, Math.PI * 2);
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(140, 160, 75, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ff0080';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(140, 160, 68, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(avatar, 72, 92, 136, 136);
+        ctx.restore();
+      } catch (err) {
+        ctx.beginPath();
+        ctx.arc(140, 160, 68, 0, Math.PI * 2);
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fill();
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#00d4ff';
+      ctx.font = 'bold 26px Arial';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(userName.toUpperCase(), 140, 270);
+      ctx.shadowBlur = 0;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(300, 80);
+      ctx.lineTo(300, 350);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillStyle = '#999999';
+      ctx.fillText('💰 YOUR BALANCE', 340, 100);
+
+      const balanceGradient = ctx.createLinearGradient(340, 110, 700, 180);
+      balanceGradient.addColorStop(0, '#00d4ff');
+      balanceGradient.addColorStop(0.5, '#ff0080');
+      balanceGradient.addColorStop(1, '#00ffaa');
+      ctx.fillStyle = balanceGradient;
+      ctx.font = 'bold 80px Arial';
+      ctx.fillText(formatMoney(userMoney), 340, 180);
+
+      ctx.strokeStyle = accentGradient;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(340, 200);
+      ctx.lineTo(720, 200);
+      ctx.stroke();
+
+      const infoCards = [
+        { icon: '⚡', text: 'Fast Transactions', x: 340, y: 240 },
+        { icon: '🔒', text: 'Secure Wallet', x: 540, y: 240 }
+      ];
+
+      infoCards.forEach(card => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        roundRect(card.x, card.y, 160, 50, 10);
+        ctx.fill();
+        
+        ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+        ctx.lineWidth = 1;
+        roundRect(card.x, card.y, 160, 50, 10);
+        ctx.stroke();
+        
+        ctx.font = '24px Arial';
+        ctx.fillStyle = '#00d4ff';
+        ctx.fillText(card.icon, card.x + 15, card.y + 35);
+        
+        ctx.font = '13px Arial';
+        ctx.fillStyle = '#cccccc';
+        ctx.fillText(card.text, card.x + 50, card.y + 32);
+      });
+
+      ctx.textAlign = 'right';
+      ctx.font = 'bold 18px Arial';
+      const brandGradient = ctx.createLinearGradient(600, 340, 720, 340);
+      brandGradient.addColorStop(0, '#00d4ff');
+      brandGradient.addColorStop(1, '#ff0080');
+      ctx.fillStyle = brandGradient;
+      ctx.fillText('DIGITAL WALLET', 720, 345);
+
+      const circles = [
+        { x: 680, y: 90, r: 30, color: 'rgba(0, 212, 255, 0.1)' },
+        { x: 730, y: 140, r: 20, color: 'rgba(255, 0, 128, 0.1)' },
+        { x: 710, y: 180, r: 15, color: 'rgba(0, 255, 170, 0.1)' }
+      ];
+
+      circles.forEach(circle => {
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, circle.r, 0, Math.PI * 2);
+        ctx.fillStyle = circle.color;
+        ctx.fill();
+      });
+
+      const imagePath = path.join(__dirname, 'cache', `balance_${targetID}.png`);
+      await fs.ensureDir(path.join(__dirname, 'cache'));
+      const buffer = canvas.toBuffer('image/png');
+      await fs.writeFile(imagePath, buffer);
+
+      message.reply({
+        body: getLang("cardMessage", userName, formatMoney(userMoney)),
+        attachment: fs.createReadStream(imagePath)
+      }, () => fs.unlinkSync(imagePath));
+
+    } catch (error) {
+      console.error(error);
+      message.reply(getLang("error"));
+    }
+  }
 };
-					
+
+async function findUserByName(api, usersData, threadID, query) {
+  try {
+    const cleanQuery = query.replace(/@/g, "").trim().toLowerCase();
+    const threadInfo = await api.getThreadInfo(threadID);
+    const ids = threadInfo.participantIDs || [];
+    const matches = [];
+
+    for (const uid of ids) {
+      try {
+        const name = (await usersData.getName(uid)).toLowerCase();
+        if (name.includes(cleanQuery)) {
+          matches.push({ uid, name: await usersData.getName(uid) });
+        }
+      } catch {}
+    }
+
+    return matches;
+  } catch {
+    return [];
+  }
+}

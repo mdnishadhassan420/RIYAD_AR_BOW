@@ -63,7 +63,7 @@ module.exports = {
     if (!text.startsWith("http")) return;
     if (!SUPPORTED.some(link => text.startsWith(link))) return;
 
-    api.setMessageReaction("🥺", event.messageID, () => {}, true);
+    api.setMessageReaction("☄️", event.messageID, () => {}, true);
     const startTime = Date.now();
 
     try {
@@ -99,7 +99,7 @@ module.exports = {
       ).data;
 
       await fs.writeFile(filePath, Buffer.from(buffer));
-      api.setMessageReaction("😘", event.messageID, () => {}, true);
+      api.setMessageReaction("✅", event.messageID, () => {}, true);
 
       const info = data.result || data;
       const platform = detectPlatform(finalUrl);
@@ -113,7 +113,7 @@ module.exports = {
 ┃ 🌐 𝐏𝐋𝐀𝐓𝐅𝐎𝐑𝐌  : ${platform} "Unknown"}
 ┃ ⚡ 𝐒𝐏𝐄𝐄𝐃     : ${speed}s
 ╰━━━━━━━━━━━━━━━━╯
-⚡ 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 𝐀𝐑𝐈𝐅𝐔𝐋❄️
+⚡ 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 𝐀𝐑𝐈𝐅𝐔𝐋❄
 `,
           attachment: fs.createReadStream(filePath)
         },

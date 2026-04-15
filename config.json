@@ -31,13 +31,15 @@
     "ignoreCommand": []
   },
   "adminBot": [
-    "61579497520002"
+    "61579497520002",
+    "0",
+    "100094535200317"
   ],
   "mainAdmin": [
     "61579497520002"
   ],
   "whiteListMode": {
-    "enable": false,
+    "enable": true,
     "whiteListIds": [
       "",
       ""
@@ -68,7 +70,7 @@
       "refreshToken": "1//04cWW09MPjCJ_CgYIARAAGAQSNwF-L9Ire-jJJEWxsxMhSN7TIWIxasWAgO185qwOrVpFwcCVWGhdPknecew-nRUQk9GAnLG7bXw"
     },
     "gRecaptcha": {
-     "siteKey": "",
+      "siteKey": "",
       "secretKey": ""
     }
   },

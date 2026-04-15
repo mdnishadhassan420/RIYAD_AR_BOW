@@ -1,77 +1,80 @@
-const fs = require("fs");
-const moment = require("moment-timezone");
+moment = require("moment-timezone");
 
 module.exports = {
   config: {
     name: "info",
-    aliases: ["admininfo", "botinfo", "mamun", "ownerinfo"],
-    version: "1.4",
-    author: "亗🅼🅰ᥫᩣ🅼ᥫᩣ🆄🅽×͜×",
-    countDown: 5,
+    version: "2.5.3",
+    author: "ST",
     role: 0,
-    shortDescription: { en: "Show bot & owner info" },
-    longDescription: { en: "Display detailed information about the bot and owner" },
+    countDown: 20,
+    shortDescription: {
+      en: "Owner & bot information"
+    },
+    longDescription: {
+      en: "Show detailed information about the bot, owner, uptime and socials"
+    },
     category: "owner",
-    guide: { en: "{pn}" }
+    guide: {
+      en: "{pn}"
+    }
   },
 
   onStart: async function ({ message }) {
 
     // OWNER INFO
-    const authorName = "×᷼×ARIFUL ISLAM☆";
-    const ownAge = "18+";
-    const messenger = "";
-    const authorFB = "ARIFUL ISLAM";
-    const authorNumber = "+96599894039";
-    const Status = "Single";
+    const ownerName = "Sayem Ahmmed";
+    const ownerAge = "19+";
+    const ownerFB = "https://www.facebook.com/sayem.ahmmed.404";
+    const ownerNumber = "+8801735624750";
+    const status = "Active";
 
-    // SAFE CATBOX VIDEO LINK
-    const videoLink = "https://files.catbox.moe/sv29c7.mp4";
+    // BOT INFO
+    const botName = global.GoatBot?.config?.nickNameBot || "GoatBot";
+    const prefix = global.GoatBot?.config?.prefix || ".";
+    const totalCommands = global.GoatBot?.commands?.size || 0;
 
-    // BANGLADESH TIME
+    // GIF / VIDEO URL
+    const images = [
+      "https://i.ibb.co/YBJ3Tzd5/image0.gif"
+    ];
+    const image = images[Math.floor(Math.random() * images.length)];
+
+    // DATE & TIME
     const now = moment().tz("Asia/Dhaka");
     const date = now.format("MMMM Do YYYY");
     const time = now.format("h:mm:ss A");
 
-    // BOT UPTIME
+    // UPTIME
     const uptime = process.uptime();
-    const seconds = Math.floor(uptime % 60);
-    const minutes = Math.floor((uptime / 60) % 60);
-    const hours = Math.floor((uptime / 3600) % 24);
     const days = Math.floor(uptime / 86400);
-
+    const hours = Math.floor((uptime % 86400) / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
     const uptimeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
-    const text =
-`✨《 BOT & OWNER INFORMATION 》🎀
-
-🤖 Bot Name: ${global.GoatBot.config.nickNameBot}
-👾 Prefix: ${global.GoatBot.config.prefix}
-
-💙 Owner Name: ${authorName}
-📝 Age: ${ownAge}
-💕 Relationship: ${Status}
-
-📞 WhatsApp: ${authorNumber}
-🌍 Facebook: ${authorFB}
-
-🗓 Date: ${date}
-⏰ Time: ${time}
-
-🔰 Contact Owner: ${messenger}
-📛 Bot Uptime: ${uptimeString}
-
-==============================`;
-
+    // SEND MESSAGE
     return message.reply({
-      body: text,
-      attachment: await global.utils.getStreamFromURL(videoLink)
-    });
-  },
+      body: `
+╔═《 ✨ 𝗢𝗪𝗡𝗘𝗥 & 𝗕𝗢𝗧 𝗜𝗡𝗙𝗢 ✨ 》═╗
 
-  onChat: async function ({ event, message }) {
-    if (event.body?.toLowerCase() === "info") {
-      return this.onStart({ message });
-    }
+⭓ 🤖 𝗕𝗼𝘁 𝗡𝗮𝗺𝗲   : 『 —͞ 𝐐𝐔𝐄𝐄𝐍 』
+⭓ ☄ 𝗣𝗿𝗲𝗳𝗶𝘅      : 『 ${prefix} 』
+⭓ 🧠 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀    : 『 ${totalCommands} 』
+⭓ ⚡ 𝗨𝗽𝘁𝗶𝗺𝗲      : 『 ${uptimeString} 』
+⭓ 🗓 𝗗𝗮𝘁𝗲        : 『 ${date} 』
+⭓ ⏰ 𝗧𝗶𝗺𝗲        : 『 ${time} 』
+
+⭓ 👑 𝗢𝘄𝗻𝗲𝗿      : 『 𝐀𝐑𝐈𝐅𝐔𝐋 』
+⭓ 🎂 𝗔𝗴𝗲        : 『 𝟏𝟖+ 』
+⭓ ❤ 𝗦𝘁𝗮𝘁𝘂𝘀     : 『 𝐀𝐂𝐓𝐈𝐕𝐄 』
+⭓ 📱 𝗪𝗵𝗮𝘁𝘀𝗔𝗽𝗽  : 『 +𝟗𝟔𝟓𝟗𝟗𝟖𝟗𝟒𝟎𝟑𝟗 』
+⭓ 🌐 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸  : 『 https://m.me/aesthetich.ariful 』
+
+───────────────
+🔧 𝐅𝐈𝐗 𝐁𝐘 𝐀𝐑𝐈𝐅𝐔𝐋
+╚══════════════════════════╝
+`,
+      attachment: await global.utils.getStreamFromURL(image)
+    });
   }
 };
