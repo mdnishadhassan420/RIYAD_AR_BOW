@@ -1,4 +1,4 @@
-<img src="https://i.ibb.co/9H2vzQDx/image0.jpg" alt="banner">
+<img src="https://i.imgur.com/4e591Re.jpeg" alt="banner">
 <h1 align="center"><img src="./dashboard/images/logo-non-bg.png" width="22px"> Xs Goat - Bot Chat Messenger</h1>
 
 <p align="center">
