@@ -22,10 +22,10 @@ module.exports = {
   onStart: async function ({ message }) {
 
     // OWNER INFO
-    const ownerName = "Sayem Ahmmed";
-    const ownerAge = "19+";
-    const ownerFB = "https://www.facebook.com/sayem.ahmmed.404";
-    const ownerNumber = "+8801735624750";
+    const ownerName = "Ahmed'z Riyad";
+    const ownerAge = "20+";
+    const ownerFB = "https://www.facebook.com/profile.php?id=61572100874270";
+    const ownerNumber = "+8801605083344";
     const status = "Active";
 
     // BOT INFO
@@ -64,14 +64,14 @@ module.exports = {
 ⭓ 🗓 𝗗𝗮𝘁𝗲        : 『 ${date} 』
 ⭓ ⏰ 𝗧𝗶𝗺𝗲        : 『 ${time} 』
 
-⭓ 👑 𝗢𝘄𝗻𝗲𝗿      : 『 𝐀𝐑𝐈𝐅𝐔𝐋 』
+⭓ 👑 𝗢𝘄𝗻𝗲𝗿      : 『 𝐑𝐈𝐘𝐀𝐃 』
 ⭓ 🎂 𝗔𝗴𝗲        : 『 𝟏𝟖+ 』
 ⭓ ❤ 𝗦𝘁𝗮𝘁𝘂𝘀     : 『 𝐀𝐂𝐓𝐈𝐕𝐄 』
-⭓ 📱 𝗪𝗵𝗮𝘁𝘀𝗔𝗽𝗽  : 『 +𝟗𝟔𝟓𝟗𝟗𝟖𝟗𝟒𝟎𝟑𝟗 』
-⭓ 🌐 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸  : 『 https://m.me/aesthetich.ariful 』
+⭓ 📱 𝗪𝗵𝗮𝘁𝘀𝗔𝗽𝗽  : 『 +𝟖𝟖𝟎𝟏𝟔𝟎𝟓𝟎𝟖𝟑𝟑𝟒𝟒 』
+⭓ 🌐 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸  : 『NAI 』
 
 ───────────────
-🔧 𝐅𝐈𝐗 𝐁𝐘 𝐀𝐑𝐈𝐅𝐔𝐋
+🔧 𝐅𝐈𝐗 𝐁𝐘 𝐑𝐈𝐘𝐀𝐃
 ╚══════════════════════════╝
 `,
       attachment: await global.utils.getStreamFromURL(image)
